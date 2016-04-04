@@ -10,6 +10,9 @@ public class Personne {
 
 	private int id;
 	private String nom;
+	private String prenom;
+	private int age;
+	private String sexe;
 
 	public Personne() {
 	}
@@ -39,6 +42,9 @@ public class Personne {
 		try {
 			p.setId(dis.readInt());
 			p.setNom(dis.readUTF());
+			p.setPrenom(dis.readUTF());
+			p.setAge(dis.readInt());
+			p.setSexe(dis.readUTF());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -55,6 +61,9 @@ public class Personne {
 		try {
 			dos.writeInt(this.getId());
 			dos.writeUTF(this.getNom());
+			dos.writeUTF(this.getPrenom());
+			dos.writeInt(this.getAge());
+			dos.writeUTF(this.getSexe());
 
 			data = bos.toByteArray();
 		} catch (IOException e) {
@@ -63,5 +72,29 @@ public class Personne {
 		}
 
 		return data;
+	}
+
+	public String getPrenom() {
+		return prenom;
+	}
+
+	public void setPrenom(String prenom) {
+		this.prenom = prenom;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
+	}
+
+	public String getSexe() {
+		return sexe;
+	}
+
+	public void setSexe(String sexe) {
+		this.sexe = sexe;
 	}
 }
