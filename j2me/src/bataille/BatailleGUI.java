@@ -223,8 +223,12 @@ public class BatailleGUI extends MIDlet {
 
 			formJeu.append(imgCarteIA);
 
-			boolean isPlayerWin = carteJoueurGagne(carteJoueur, carteIA);
-			System.out.println("isPlayerWin : " + isPlayerWin);
+			Boolean isPlayerWin = carteJoueurGagne(carteJoueur, carteIA);
+			if (isPlayerWin == null) {
+				System.out.println("Bataille !");
+			} else {
+				System.out.println("isPlayerWin : " + isPlayerWin);
+			}
 
 		} catch (IOException exception) {
 			formJeu.append("erreur chargement image");
@@ -257,8 +261,10 @@ public class BatailleGUI extends MIDlet {
 		return carte;
 	}
 
-	private boolean carteJoueurGagne(String carteJoueur, String carteIA) {
-		return getValeurDepuisCarte(carteJoueur) > getValeurDepuisCarte(carteIA);
+	private Boolean carteJoueurGagne(String carteJoueur, String carteIA) {
+		int valeurCarteJoueur = getValeurDepuisCarte(carteJoueur);
+		int valeurCarteIA = getValeurDepuisCarte(carteIA);
+		return valeurCarteJoueur == valeurCarteIA ? null : new Boolean(valeurCarteJoueur > valeurCarteIA);
 	}
 
 	private int getValeurDepuisCarte(String carte) {
@@ -267,7 +273,28 @@ public class BatailleGUI extends MIDlet {
 
 		String cleValeur = carte.substring(indexDebutValeur, indexFinValeur);
 		System.out.println("cleValeur : " + cleValeur);
-		return ((Integer) valeurCarte.get(cleValeur)).intValue();
+		return getIntDepuisValeurCarte(cleValeur);
+	}
+
+	/**
+	 * La valeur d'une carte sous forme d'int
+	 * 
+	 * @param valeurCarteString
+	 *            ex: "Neuf"
+	 * @return ex: 9
+	 */
+	private int getIntDepuisValeurCarte(String valeurCarteString) {
+		int valeurDeLaCarte = 0;
+		for (Enumeration enumValeurCarte = valeurCarte.keys(); enumValeurCarte.hasMoreElements();) {
+			Integer enumValeurKey = (Integer) enumValeurCarte.nextElement();
+			String enumValeurCarteString = (String) valeurCarte.get(enumValeurKey);
+			if (enumValeurCarteString.equals(valeurCarteString)) {
+				valeurDeLaCarte = enumValeurKey.intValue();
+				break;
+			}
+		}
+		System.out.println("getIntDepuisValeurCarte " + valeurCarteString + " = " + valeurDeLaCarte);
+		return valeurDeLaCarte;
 	}
 
 	protected void pauseApp() {
