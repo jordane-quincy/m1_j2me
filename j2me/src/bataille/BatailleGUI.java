@@ -5,6 +5,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Random;
 import java.util.Stack;
+import java.util.Vector;
 
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
@@ -38,11 +39,15 @@ public class BatailleGUI extends MIDlet {
 	private Command commandTirerCarte;
 	private RecordStore rs = null;
 
+	Random random;
 	private Hashtable enseigneCarte;
 	private Hashtable valeurCarte;
-	private Stack cartes;
 
-	private final String SEPARATEUR = "_";
+	private Stack pileJoueur;
+	private Stack pileIA;
+
+	private Stack carteJoueurEnJeu;
+	private Stack cartesIAEnJeu;
 
 	public BatailleGUI() {
 		// constructeur
@@ -58,6 +63,7 @@ public class BatailleGUI extends MIDlet {
 		formInfosJoueur.setCommandListener(cl);
 		formJeu.setCommandListener(cl);
 
+		random = new Random();
 		initCartes();
 
 	}
@@ -91,7 +97,7 @@ public class BatailleGUI extends MIDlet {
 		initEnseigneCarte();
 		initValeurCarte();
 
-		cartes = new Stack();
+		Vector cartes = new Vector();
 		for (Enumeration enseigneEnumeration = enseigneCarte.keys(); enseigneEnumeration.hasMoreElements();) {
 			String enseigne = (String) enseigneEnumeration.nextElement();
 			for (Enumeration valeurCarteEnumeration = valeurCarte.keys(); valeurCarteEnumeration.hasMoreElements();) {
@@ -101,11 +107,38 @@ public class BatailleGUI extends MIDlet {
 				String valeurDeLaCarte = (String) valeurCarte.get(valeur);
 
 				String nomDuFichierImg = enseigneDeLaCarte + "_" + valeurDeLaCarte + ".png";
-				// System.out.println("nomDuFichierImg : " + nomDuFichierImg);
-				cartes.addElement(nomDuFichierImg);
-
+				cartes.addElement(
+						new Carte(valeur.intValue(), valeurDeLaCarte, enseigne, enseigneDeLaCarte, nomDuFichierImg));
 			}
 		}
+
+		// distribute all cards : half for player, half for ia
+		pileJoueur = new Stack();
+		pileIA = new Stack();
+		carteJoueurEnJeu = new Stack();
+		cartesIAEnJeu = new Stack();
+
+		// to preserve how many cartes have to be splitted between players
+		// (because cartes size will decrease each time)
+		int nbCartes = cartes.size();
+		for (int i = 0; i < nbCartes; i++) {
+			System.out.println("cartes.size() : " + cartes.size());
+			int indexRandom = 0;
+			Carte carte = null;
+			while (carte == null) {
+				indexRandom = random.nextInt(cartes.size());
+				carte = (Carte) cartes.elementAt(indexRandom);
+			}
+			cartes.removeElementAt(indexRandom);
+			if (i % 2 == 0) {
+				pileJoueur.addElement(carte);
+			} else {
+				pileIA.addElement(carte);
+			}
+		}
+		System.out.println("cartesJoueur size : " + pileJoueur.size() + ", cartesIA size :" + pileIA.size());
+
+		cartes = null; // free mem
 	}
 
 	protected void destroyApp(boolean unconditional) throws MIDletStateChangeException {
@@ -200,12 +233,13 @@ public class BatailleGUI extends MIDlet {
 		formJeu.deleteAll();
 
 		try {
-			String carteJoueur = tirerUneCarte();
-			Image imgCarteJoueur = Image.createImage(Image.createImage("cartes/" + carteJoueur), 0, 0, 32, 64, 0);
+			Carte carteJoueur = tirerUneCarte(pileJoueur);
+			carteJoueurEnJeu.push(carteJoueur);
+			Image imgCarteJoueur = Image.createImage(Image.createImage("cartes/" + carteJoueur.getPathImgFile()), 0, 0,
+					46, 64, 0);
 
 			// ajout de vide a gauche pour center la carte
-			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteJoueur.getWidth()) / 2,
-					(monDisplay.getCurrent().getHeight() - imgCarteJoueur.getHeight()) / 2));
+			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteJoueur.getWidth()) / 2, 0));
 
 			formJeu.append(imgCarteJoueur);
 
@@ -214,20 +248,28 @@ public class BatailleGUI extends MIDlet {
 			imgTirerCarte.addCommand(commandTirerCarte);
 			imgTirerCarte.setItemCommandListener(icl);
 
-			String carteIA = tirerUneCarte();
-			Image imgCarteIA = Image.createImage(Image.createImage("cartes/" + carteIA), 0, 0, 32, 64, 0);
+			Carte carteIA = tirerUneCarte(pileIA);
+			cartesIAEnJeu.push(carteIA);
+			Image imgCarteIA = Image.createImage(Image.createImage("cartes/" + carteIA.getPathImgFile()), 0, 0, 46, 64,
+					0);
 
 			// ajout de vide a gauche pour center la carte
-			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteIA.getWidth()) / 2,
-					(monDisplay.getCurrent().getHeight() - imgCarteIA.getHeight()) / 2));
+			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteIA.getWidth()) / 2, 0));
 
 			formJeu.append(imgCarteIA);
 
 			Boolean isPlayerWin = carteJoueurGagne(carteJoueur, carteIA);
 			if (isPlayerWin == null) {
 				System.out.println("Bataille !");
+				showJeu(player);
 			} else {
 				System.out.println("isPlayerWin : " + isPlayerWin);
+				deplacerCarte(pileJoueur, carteJoueurEnJeu, pileIA, cartesIAEnJeu, isPlayerWin.booleanValue());
+				System.out.println("cartes joueur : " + pileJoueur.size() + ", cartes ia : " + pileIA.size());
+			}
+
+			if (pileJoueur.size() == 0 || pileIA.size() == 0) {
+				gestionFinDeJeu(pileJoueur.size() == 0, player);
 			}
 
 		} catch (IOException exception) {
@@ -237,7 +279,42 @@ public class BatailleGUI extends MIDlet {
 		monDisplay.setCurrent(formJeu);
 	}
 
-	private String tirerUneCarte() {
+	private void gestionFinDeJeu(boolean isPlayerWinTheGame, Personne joueur) {
+		formJeu.deleteAll();
+
+		formJeu.append(new TextField("Vainqueur : ",
+				isPlayerWinTheGame ? joueur == null ? "Joueur" : joueur.getPrenom() : "IA", 25, TextField.UNEDITABLE));
+	}
+
+	private void deplacerCarte(Stack cartesJoueur, Stack cartesJoueurEnJeu, Stack cartesIA, Stack cartesIAEnJeu,
+			boolean isPlayerWin) {
+		if (isPlayerWin) {
+			echangerCarte(cartesJoueur, cartesJoueurEnJeu, cartesIA, cartesIAEnJeu);
+		} else {
+			echangerCarte(cartesIA, cartesIAEnJeu, cartesJoueur, cartesJoueurEnJeu);
+		}
+	}
+
+	private void echangerCarte(Stack pileAReduire, Stack cartesARetirer, Stack pileAAugmenter, Stack cartesAAjouter) {
+		retirerCarte(pileAReduire, cartesARetirer);
+		ajouterCarte(pileAAugmenter, cartesAAjouter);
+	}
+
+	private void retirerCarte(Stack pileAReduire, Stack cartesEnJeu) {
+		while (!cartesEnJeu.empty()) {
+			Carte carteEnJeu = (Carte) cartesEnJeu.pop();
+			pileAReduire.removeElement(carteEnJeu);
+		}
+	}
+
+	private void ajouterCarte(Stack pileAAugmenter, Stack cartesEnJeu) {
+		while (!cartesEnJeu.empty()) {
+			Carte carteEnJeu = (Carte) cartesEnJeu.pop();
+			pileAAugmenter.addElement(carteEnJeu);
+		}
+	}
+
+	private Carte tirerUneCarte(Stack stackDeCartes) {
 		Random random = new Random();
 		// random de 0 (inclus) a X (exclus) donc +1 pour qu'il soit inclus
 		/*
@@ -255,46 +332,16 @@ public class BatailleGUI extends MIDlet {
 		 * valeurCarte.get(carteKey);
 		 */
 
-		int indexCarteHasard = random.nextInt(cartes.size());
-		String carte = (String) cartes.elementAt(indexCarteHasard);
+		int indexCarteHasard = random.nextInt(stackDeCartes.size());
+		Carte carte = (Carte) stackDeCartes.elementAt(indexCarteHasard);
 		System.out.println("carte tirer : " + carte);
 		return carte;
 	}
 
-	private Boolean carteJoueurGagne(String carteJoueur, String carteIA) {
-		int valeurCarteJoueur = getValeurDepuisCarte(carteJoueur);
-		int valeurCarteIA = getValeurDepuisCarte(carteIA);
+	private Boolean carteJoueurGagne(Carte carteJoueur, Carte carteIA) {
+		int valeurCarteJoueur = carteJoueur.getValeur();
+		int valeurCarteIA = carteIA.getValeur();
 		return valeurCarteJoueur == valeurCarteIA ? null : new Boolean(valeurCarteJoueur > valeurCarteIA);
-	}
-
-	private int getValeurDepuisCarte(String carte) {
-		int indexDebutValeur = carte.indexOf(SEPARATEUR) + SEPARATEUR.length();
-		int indexFinValeur = carte.indexOf(".");
-
-		String cleValeur = carte.substring(indexDebutValeur, indexFinValeur);
-		System.out.println("cleValeur : " + cleValeur);
-		return getIntDepuisValeurCarte(cleValeur);
-	}
-
-	/**
-	 * La valeur d'une carte sous forme d'int
-	 * 
-	 * @param valeurCarteString
-	 *            ex: "Neuf"
-	 * @return ex: 9
-	 */
-	private int getIntDepuisValeurCarte(String valeurCarteString) {
-		int valeurDeLaCarte = 0;
-		for (Enumeration enumValeurCarte = valeurCarte.keys(); enumValeurCarte.hasMoreElements();) {
-			Integer enumValeurKey = (Integer) enumValeurCarte.nextElement();
-			String enumValeurCarteString = (String) valeurCarte.get(enumValeurKey);
-			if (enumValeurCarteString.equals(valeurCarteString)) {
-				valeurDeLaCarte = enumValeurKey.intValue();
-				break;
-			}
-		}
-		System.out.println("getIntDepuisValeurCarte " + valeurCarteString + " = " + valeurDeLaCarte);
-		return valeurDeLaCarte;
 	}
 
 	protected void pauseApp() {
