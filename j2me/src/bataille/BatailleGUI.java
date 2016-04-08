@@ -45,8 +45,8 @@ public class BatailleGUI extends MIDlet {
 	private Hashtable enseigneCarte;
 	private Hashtable valeurCarte;
 
-	private Stack pileJoueur;
-	private Stack pileIA;
+	private Pile pileJoueur;
+	private Pile pileIA;
 
 	private Stack carteJoueurEnJeu;
 	private Stack cartesIAEnJeu;
@@ -115,8 +115,8 @@ public class BatailleGUI extends MIDlet {
 		}
 
 		// distribute all cards : half for player, half for ia
-		pileJoueur = new Stack();
-		pileIA = new Stack();
+		Stack tempStackJoueur = new Stack();
+		Stack tempStackIA = new Stack();
 		carteJoueurEnJeu = new Stack();
 		cartesIAEnJeu = new Stack();
 
@@ -133,11 +133,13 @@ public class BatailleGUI extends MIDlet {
 			}
 			cartes.removeElementAt(indexRandom);
 			if (i % 2 == 0) {
-				pileJoueur.addElement(carte);
+				tempStackJoueur.addElement(carte);
 			} else {
-				pileIA.addElement(carte);
+				tempStackIA.addElement(carte);
 			}
 		}
+		pileJoueur = new Pile(tempStackJoueur);
+		pileIA = new Pile(tempStackIA);
 		System.out.println("cartesJoueur size : " + pileJoueur.size() + ", cartesIA size :" + pileIA.size());
 
 		cartes = null; // free mem
@@ -274,8 +276,8 @@ public class BatailleGUI extends MIDlet {
 			if (isPlayerWin == null) {
 				System.out.println("Bataille !");
 				Alert alert = new Alert("Bataille !");
-				alert.setType(AlertType.ALARM);
-				alert.setTimeout(10000);
+				alert.setType(AlertType.INFO);
+				alert.setTimeout(1000);
 				monDisplay.setCurrent(alert, formJeu);
 
 				// FIXME: afficher la bataille au joueur (pas de popup ni de
@@ -322,7 +324,7 @@ public class BatailleGUI extends MIDlet {
 				isPlayerWinTheGame ? joueur == null ? "Joueur" : joueur.getPrenom() : "IA", 25, TextField.UNEDITABLE));
 	}
 
-	private void deplacerCarte(Stack cartesJoueur, Stack cartesJoueurEnJeu, Stack cartesIA, Stack cartesIAEnJeu,
+	private void deplacerCarte(Pile cartesJoueur, Stack cartesJoueurEnJeu, Pile cartesIA, Stack cartesIAEnJeu,
 			boolean isPlayerWin) {
 		if (isPlayerWin) {
 			echangerCarte(cartesJoueur, cartesJoueurEnJeu, cartesIA, cartesIAEnJeu);
@@ -331,31 +333,15 @@ public class BatailleGUI extends MIDlet {
 		}
 	}
 
-	private void echangerCarte(Stack pileAReduire, Stack cartesARetirer, Stack pileAAugmenter, Stack cartesAAjouter) {
-		retirerCarte(pileAReduire, cartesARetirer);
-		ajouterCarte(pileAAugmenter, cartesAAjouter);
+	private void echangerCarte(Pile pileAReduire, Stack cartesARetirer, Pile pileAAugmenter, Stack cartesAAjouter) {
+		pileAReduire.retirerCarte(cartesARetirer);
+		pileAAugmenter.ajouterCarte(cartesAAjouter);
 	}
 
-	private void retirerCarte(Stack pileAReduire, Stack cartesEnJeu) {
-		while (!cartesEnJeu.empty()) {
-			Carte carteEnJeu = (Carte) cartesEnJeu.pop();
-			pileAReduire.removeElement(carteEnJeu);
-		}
-	}
-
-	private void ajouterCarte(Stack pileAAugmenter, Stack cartesEnJeu) {
-		while (!cartesEnJeu.empty()) {
-			Carte carteEnJeu = (Carte) cartesEnJeu.pop();
-			// FIXME: il faut ajouter les cartes en DESSOUS de la pile (et non
-			// sur le dessus comme ici)
-			pileAAugmenter.addElement(carteEnJeu);
-		}
-	}
-
-	private Carte tirerUneCarte(Stack stackDeCartes) {
+	private Carte tirerUneCarte(Pile stackDeCartes) {
 		Random random = new Random();
 		int indexCarteHasard = random.nextInt(stackDeCartes.size());
-		Carte carte = (Carte) stackDeCartes.elementAt(indexCarteHasard);
+		Carte carte = stackDeCartes.obtenirCarte(indexCarteHasard);
 		System.out.println("carte tirer : " + carte);
 		return carte;
 	}
