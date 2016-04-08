@@ -7,6 +7,8 @@ import java.util.Random;
 import java.util.Stack;
 import java.util.Vector;
 
+import javax.microedition.lcdui.Alert;
+import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
@@ -55,7 +57,7 @@ public class BatailleGUI extends MIDlet {
 		formInfosJoueur = new Form("Informations joueur");
 		formJeu = new Form("Jeu de bataille");
 		cl = new GestionEvenements();
-		icl = new GestionItemEvenements();
+		icl = new GestionEvenements();
 		commandSaveInfosJoueur = new Command("Enregister", Command.SCREEN, 1);
 		commandTirerCarte = new Command("Tirer", Command.OK, 2);
 		formInfosJoueur.addCommand(commandSaveInfosJoueur);
@@ -233,6 +235,14 @@ public class BatailleGUI extends MIDlet {
 		formJeu.deleteAll();
 
 		try {
+			// Image imgStackJoueur =
+			// Image.createImage(Image.createImage("cartes/" +
+			// "rouge_Verso.png"), 0, 0, 46, 64, 0);
+			formJeu.append(new ImageItem("Nb cartes : " + String.valueOf(pileJoueur.size()), null,
+					ImageItem.LAYOUT_LEFT, null, ImageItem.PLAIN));
+			// new TextField("Nb cartes : ", String.valueOf(pileJoueur.size()),
+			// 15, TextField.UNEDITABLE));
+
 			Carte carteJoueur = tirerUneCarte(pileJoueur);
 			carteJoueurEnJeu.push(carteJoueur);
 			Image imgCarteJoueur = Image.createImage(Image.createImage("cartes/" + carteJoueur.getPathImgFile()), 0, 0,
@@ -241,7 +251,7 @@ public class BatailleGUI extends MIDlet {
 			// ajout de vide a gauche pour center la carte
 			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteJoueur.getWidth()) / 2, 0));
 
-			formJeu.append(imgCarteJoueur);
+			int indexFormImgCartesoueur = formJeu.append(imgCarteJoueur);
 
 			ImageItem imgTirerCarte = new ImageItem("Tirer carte", null, ImageItem.LAYOUT_CENTER, "");
 			formJeu.append(imgTirerCarte);
@@ -258,9 +268,37 @@ public class BatailleGUI extends MIDlet {
 
 			formJeu.append(imgCarteIA);
 
+			monDisplay.setCurrent(formJeu);
+
 			Boolean isPlayerWin = carteJoueurGagne(carteJoueur, carteIA);
 			if (isPlayerWin == null) {
 				System.out.println("Bataille !");
+				Alert alert = new Alert("Bataille !");
+				alert.setType(AlertType.ALARM);
+				alert.setTimeout(10000);
+				monDisplay.setCurrent(alert, formJeu);
+
+				// FIXME: afficher la bataille au joueur (pas de popup ni de
+				// toast en jme, si ?)
+				// formJeu.get(indexFormImgCartesoueur).
+				// imgCarteJoueur.getGraphics().fillRect(0, 0,
+				// imgCarteJoueur.getWidth(), imgCarteJoueur.getHeight());
+
+				// chaque joueur prend la carte du haut de sa pile et la met en
+				// jeu face cachée avant un nouveau tirage
+				carteJoueurEnJeu.push(pileJoueur.pop());
+				cartesIAEnJeu.push(pileIA.pop());
+
+				// FIXME: avec le sleep l'app est bien bloquée mais malgré le
+				// setCurrent au dessus, on voit toujours les anciennes cartes
+				// (celle du tour d'avant la bataille) :-( WTF ?!
+				// try {
+				// Thread.sleep(2000);
+				// } catch (InterruptedException e) {
+				// // TODO Auto-generated catch block
+				// e.printStackTrace();
+				// }
+
 				showJeu(player);
 			} else {
 				System.out.println("isPlayerWin : " + isPlayerWin);
@@ -275,8 +313,6 @@ public class BatailleGUI extends MIDlet {
 		} catch (IOException exception) {
 			formJeu.append("erreur chargement image");
 		}
-
-		monDisplay.setCurrent(formJeu);
 	}
 
 	private void gestionFinDeJeu(boolean isPlayerWinTheGame, Personne joueur) {
@@ -310,28 +346,14 @@ public class BatailleGUI extends MIDlet {
 	private void ajouterCarte(Stack pileAAugmenter, Stack cartesEnJeu) {
 		while (!cartesEnJeu.empty()) {
 			Carte carteEnJeu = (Carte) cartesEnJeu.pop();
+			// FIXME: il faut ajouter les cartes en DESSOUS de la pile (et non
+			// sur le dessus comme ici)
 			pileAAugmenter.addElement(carteEnJeu);
 		}
 	}
 
 	private Carte tirerUneCarte(Stack stackDeCartes) {
 		Random random = new Random();
-		// random de 0 (inclus) a X (exclus) donc +1 pour qu'il soit inclus
-		/*
-		 * int indexEnseigneHasard = random.nextInt(enseigneCarte.size() + 1);
-		 * 
-		 * Enumeration enseigneE = enseigneCarte.elements(); String enseigneKey
-		 * = null; for (int i = 0; i <= indexEnseigneHasard; i++) { enseigneKey
-		 * = enseigneE.nextElement(); } String enseigne = (String)
-		 * enseigneCarte.get(enseigneKey);
-		 * 
-		 * int indexCarteHasard = random.nextInt(valeurCarte.size() + 1);
-		 * Enumeration carteE = valeurCarte.elements(); Integer carteKey = null;
-		 * for (int i = 0; i <= indexCarteHasard; i++) { carteKey =
-		 * carteE.nextElement(); } String carte = (String)
-		 * valeurCarte.get(carteKey);
-		 */
-
 		int indexCarteHasard = random.nextInt(stackDeCartes.size());
 		Carte carte = (Carte) stackDeCartes.elementAt(indexCarteHasard);
 		System.out.println("carte tirer : " + carte);
@@ -426,7 +448,8 @@ public class BatailleGUI extends MIDlet {
 		}
 	}
 
-	class GestionEvenements implements CommandListener {
+	class GestionEvenements implements CommandListener, ItemCommandListener {
+		// CommandListener
 		public void commandAction(Command c, Displayable d) {
 			if (d == formInfosJoueur) {
 				if (c == commandSaveInfosJoueur) {
@@ -435,10 +458,7 @@ public class BatailleGUI extends MIDlet {
 			}
 		}
 
-	}
-
-	class GestionItemEvenements implements ItemCommandListener {
-
+		// ItemCommandListener
 		public void commandAction(Command c, Item item) {
 
 			if (c == commandTirerCarte) {
