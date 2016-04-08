@@ -253,7 +253,7 @@ public class BatailleGUI extends MIDlet {
 			// ajout de vide a gauche pour center la carte
 			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteJoueur.getWidth()) / 2, 0));
 
-			int indexFormImgCartesoueur = formJeu.append(imgCarteJoueur);
+			int indexFormImgCarteJoueur = formJeu.append(imgCarteJoueur);
 
 			ImageItem imgTirerCarte = new ImageItem("Tirer carte", null, ImageItem.LAYOUT_CENTER, "");
 			formJeu.append(imgTirerCarte);
@@ -277,7 +277,7 @@ public class BatailleGUI extends MIDlet {
 				System.out.println("Bataille !");
 				Alert alert = new Alert("Bataille !");
 				alert.setType(AlertType.INFO);
-				alert.setTimeout(1000);
+				alert.setTimeout(5000);
 				monDisplay.setCurrent(alert, formJeu);
 
 				// FIXME: afficher la bataille au joueur (pas de popup ni de
@@ -315,6 +315,8 @@ public class BatailleGUI extends MIDlet {
 		} catch (IOException exception) {
 			formJeu.append("erreur chargement image");
 		}
+
+		monDisplay.setCurrent(formJeu);
 	}
 
 	private void gestionFinDeJeu(boolean isPlayerWinTheGame, Personne joueur) {
