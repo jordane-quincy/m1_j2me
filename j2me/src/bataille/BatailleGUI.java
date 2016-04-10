@@ -37,6 +37,7 @@ public class BatailleGUI extends MIDlet {
 	private Form formJeu;
 	private CommandListener cl;
 	private Command commandSaveInfosJoueur;
+	private Command exit;
 	private ItemCommandListener icl;
 	private Command commandTirerCarte;
 	private RecordStore rs = null;
@@ -54,10 +55,11 @@ public class BatailleGUI extends MIDlet {
 	public BatailleGUI() {
 		// constructeur
 		monDisplay = Display.getDisplay(this);
-		formInfosJoueur = new Form("Informations joueur");
+		formInfosJoueur = new Form("Informations du joueur");
 		formJeu = new Form("Jeu de bataille");
 		cl = new GestionEvenements();
 		icl = new GestionEvenements();
+		exit = new Command("Exit", Command.EXIT, 1);
 		commandSaveInfosJoueur = new Command("Enregister", Command.SCREEN, 1);
 		commandTirerCarte = new Command("Tirer", Command.OK, 2);
 		formInfosJoueur.addCommand(commandSaveInfosJoueur);
@@ -228,6 +230,7 @@ public class BatailleGUI extends MIDlet {
 		formInfosJoueur.append(sexeChoiceGroup);
 
 		formInfosJoueur.addCommand(commandSaveInfosJoueur);
+		formInfosJoueur.addCommand(exit);
 
 		monDisplay.setCurrent(formInfosJoueur);
 	}
@@ -257,6 +260,7 @@ public class BatailleGUI extends MIDlet {
 
 			ImageItem imgTirerCarte = new ImageItem("Tirer carte", null, ImageItem.LAYOUT_CENTER, "");
 			formJeu.append(imgTirerCarte);
+			formJeu.addCommand(exit);
 			imgTirerCarte.addCommand(commandTirerCarte);
 			imgTirerCarte.setItemCommandListener(icl);
 
@@ -443,6 +447,17 @@ public class BatailleGUI extends MIDlet {
 				if (c == commandSaveInfosJoueur) {
 					showJeu(null);
 				}
+			}
+			if (c == exit) {
+				{
+					try {
+						destroyApp(false);
+					} catch (MIDletStateChangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				      notifyDestroyed();
+			    }
 			}
 		}
 
