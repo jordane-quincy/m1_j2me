@@ -40,6 +40,7 @@ public class BatailleGUI extends MIDlet {
 	private Command exit;
 	private ItemCommandListener icl;
 	private Command commandTirerCarte;
+	private Command newGame;
 	private RecordStore rs = null;
 
 	Random random;
@@ -62,6 +63,7 @@ public class BatailleGUI extends MIDlet {
 		exit = new Command("Exit", Command.EXIT, 1);
 		commandSaveInfosJoueur = new Command("Enregister", Command.SCREEN, 1);
 		commandTirerCarte = new Command("Tirer", Command.OK, 2);
+		newGame = new Command("Nouvelle Partie", Command.SCREEN, 1);
 		formInfosJoueur.addCommand(commandSaveInfosJoueur);
 
 		formInfosJoueur.setCommandListener(cl);
@@ -69,7 +71,6 @@ public class BatailleGUI extends MIDlet {
 
 		random = new Random();
 		initCartes();
-
 	}
 
 	private void initEnseigneCarte() {
@@ -312,7 +313,10 @@ public class BatailleGUI extends MIDlet {
 				System.out.println("cartes joueur : " + pileJoueur.size() + ", cartes ia : " + pileIA.size());
 			}
 
-			if (pileJoueur.size() == 0 || pileIA.size() == 0) {
+			/*if (pileJoueur.size() == 0 || pileIA.size() == 0) {
+				gestionFinDeJeu(pileJoueur.size() == 0, player);
+			}*/
+			if (pileJoueur.size() < 20 || pileIA.size() < 20) {
 				gestionFinDeJeu(pileJoueur.size() == 0, player);
 			}
 
@@ -328,6 +332,7 @@ public class BatailleGUI extends MIDlet {
 
 		formJeu.append(new TextField("Vainqueur : ",
 				isPlayerWinTheGame ? joueur == null ? "Joueur" : joueur.getPrenom() : "IA", 25, TextField.UNEDITABLE));
+		formJeu.addCommand(newGame);
 	}
 
 	private void deplacerCarte(Pile cartesJoueur, Stack cartesJoueurEnJeu, Pile cartesIA, Stack cartesIAEnJeu,
@@ -448,6 +453,15 @@ public class BatailleGUI extends MIDlet {
 					showJeu(null);
 				}
 			}
+			if (c == newGame) {
+				// Start une nouvelle partie
+				// Réinitialisation des tâches
+				// Remove de la commande new game
+				formJeu.removeCommand(newGame);
+				System.out.println("new Game");
+				initCartes();
+				showJeu(null);
+			}
 			if (c == exit) {
 				{
 					try {
@@ -463,7 +477,7 @@ public class BatailleGUI extends MIDlet {
 
 		// ItemCommandListener
 		public void commandAction(Command c, Item item) {
-
+			
 			if (c == commandTirerCarte) {
 				showJeu(null);
 			}

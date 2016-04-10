@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mtjMetadata jad="BatailleCartes.jad" version="2.0.1.201509042315">
-   <device group="Oracle Java(TM) Platform Micro Edition SDK 3.4" name="ClamshellJavaMEPhone1"/>
+   <device group="Oracle Java(TM) Platform Micro Edition SDK 3.4" name="JavaMEPhone1"/>
    <signing projectSpecific="false" signProject="false">
       <alias/>
    </signing>
