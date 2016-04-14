@@ -458,7 +458,7 @@ public class BatailleGUI extends MIDlet {
 				// Réinitialisation des tâches
 				// Remove de la commande new game
 				formJeu.removeCommand(newGame);
-				System.out.println("new Game");
+				System.out.println("New Game");
 				initCartes();
 				showJeu(null);
 			}
