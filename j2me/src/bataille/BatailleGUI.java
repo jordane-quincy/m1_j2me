@@ -22,6 +22,7 @@ import javax.microedition.lcdui.ImageItem;
 import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.ItemCommandListener;
 import javax.microedition.lcdui.Spacer;
+import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.TextField;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
@@ -39,7 +40,10 @@ public class BatailleGUI extends MIDlet {
 	private Command commandSaveInfosJoueur;
 	private Command exit;
 	private ItemCommandListener icl;
-	private Command commandTirerCarte;
+	private Command commandRetournerCarte;
+	private Command commandPoserCarte;
+	private Command commandRamasserCarte;
+	private Command commandPoserCarteBataille;
 	private Command newGame;
 	private RecordStore rs = null;
 
@@ -48,7 +52,7 @@ public class BatailleGUI extends MIDlet {
 	private Hashtable valeurCarte;
 
 	private Pile pileJoueur;
-	private Pile pileIA;
+	private Pile pileIA;	
 
 	private Stack carteJoueurEnJeu;
 	private Stack cartesIAEnJeu;
@@ -62,7 +66,10 @@ public class BatailleGUI extends MIDlet {
 		icl = new GestionEvenements();
 		exit = new Command("Exit", Command.EXIT, 1);
 		commandSaveInfosJoueur = new Command("Enregister", Command.SCREEN, 1);
-		commandTirerCarte = new Command("Tirer", Command.OK, 2);
+		commandRetournerCarte = new Command("Retourner carte", Command.OK, 2);
+		commandPoserCarte = new Command("Poser carte", Command.OK, 2);
+		commandRamasserCarte = new Command("Ramasser carte", Command.OK, 2);
+		commandPoserCarteBataille = new Command("Poser carte", Command.OK, 2);
 		newGame = new Command("Nouvelle Partie", Command.SCREEN, 1);
 		formInfosJoueur.addCommand(commandSaveInfosJoueur);
 
@@ -235,6 +242,158 @@ public class BatailleGUI extends MIDlet {
 
 		monDisplay.setCurrent(formInfosJoueur);
 	}
+	
+	private void _beginingOfTheGame() {
+		formJeu.append(new StringItem("", "Vous êtes sur le point de commencer la partie, cliquer sur poser carte pour commencer !"));
+		ImageItem imgPoserCarte = new ImageItem("Poser carte", null, ImageItem.LAYOUT_CENTER, "");
+		formJeu.append(imgPoserCarte);
+		formJeu.addCommand(exit);
+		imgPoserCarte.addCommand(commandPoserCarte);
+		imgPoserCarte.setItemCommandListener(icl);
+		monDisplay.setCurrent(formJeu);
+	}
+	
+	private void pushCard(boolean isBataille) {
+		try {
+			///On prend le verso des cartes
+			Image imgCarteJoueur = Image.createImage(Image.createImage("cartes/noir_Verso.png"), 0, 0, 46, 64, 0);
+			Image imgCarteIA = Image.createImage(Image.createImage("cartes/rouge_Verso.png"), 0, 0, 46, 64, 0);
+			//Gestion poser card quand c'est en pleine bataille 
+			if (isBataille) {
+				//Il faut ajouter une carte de chaque joueur aux cartes en jeu
+				carteJoueurEnJeu.push(pileJoueur.pop());
+				cartesIAEnJeu.push(pileIA.pop());				
+			}							
+			_showJeu(imgCarteJoueur, imgCarteIA, true, false, false, false, false);			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void returnCard() {
+		try {
+			//On prend une carte de la pile du joueur
+			Carte carteJoueur = tirerUneCarte(pileJoueur);
+			carteJoueurEnJeu.push(carteJoueur);
+			Image imgCarteJoueur = Image.createImage(Image.createImage("cartes/" + carteJoueur.getPathImgFile()), 0, 0,
+						46, 64, 0);
+			//On prend un carte de la pile de l'ia
+			Carte carteIA = tirerUneCarte(pileIA);
+			cartesIAEnJeu.push(carteIA);
+			Image imgCarteIA = Image.createImage(Image.createImage("cartes/" + carteIA.getPathImgFile()), 0, 0, 46, 64,
+					0);
+			
+			//Checker qui a gagner
+			Boolean isPlayerWin = carteJoueurGagne(carteJoueur, carteIA);
+			if (isPlayerWin == null) {
+				//Gérer la bataille
+				_showJeu(imgCarteJoueur, imgCarteIA, false, true, false, true, false);
+			}
+			else {
+				//Ce n'est pas une bataille, il faut ramasser les cartes
+				System.out.println("isPlayerWin : " + isPlayerWin);
+				deplacerCarte(pileJoueur, carteJoueurEnJeu, pileIA, cartesIAEnJeu, isPlayerWin.booleanValue());
+				System.out.println("cartes joueur : " + pileJoueur.size() + ", cartes ia : " + pileIA.size());
+				_showJeu(imgCarteJoueur, imgCarteIA, false, true, false, false, isPlayerWin.booleanValue());
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void takeCard() {
+		//Check if it is the end of the game
+		
+		//If it is not the end of the game
+		_showJeu(null, null, false, false, true, false, false);
+	}
+	
+	
+	
+	/**
+	 * _showJeu will just show cards (images that we pass in arguments 
+	 * and add command depending of the moment of the game
+	 * @param imgCarteJoueur
+	 * @param imgCarteIA
+	 * @param pushCards
+	 * @param returnCards
+	 * @param takeCards
+	 * @param bataille
+	 */
+	private void _showJeu (Image imgCarteJoueur, Image imgCarteIA, boolean pushCards, boolean returnCards, boolean takeCards, boolean bataille, boolean isPlayerWin) {
+		// pour redessiner completement
+		formJeu.deleteAll();
+		
+		//Affichage de la carte de l'ia
+		// ajout de vide a gauche pour center la carte
+		if (imgCarteIA != null) {
+			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteIA.getWidth()) / 2, 0));
+			formJeu.append(imgCarteIA);
+		}
+		
+		
+		
+		//Affichage de l'action en fonction du moment du jeu
+		//pushCards est vrai quand on vient de poser de carte, il faut donc ensuite les retourner
+		if (pushCards) {
+			ImageItem imgRetournerCarte = new ImageItem("Retourner carte", null, ImageItem.LAYOUT_CENTER, "");
+			formJeu.append(imgRetournerCarte);
+			formJeu.addCommand(exit);
+			imgRetournerCarte.addCommand(commandRetournerCarte);
+			imgRetournerCarte.setItemCommandListener(icl);
+		}
+		//On vient de retourner les cartes
+		if (returnCards) {
+			//Gérer cas bataille
+			if (bataille) {
+				formJeu.append(new StringItem("", "Bataille !!! Posez une carte et retournez-en une autre !"));
+				ImageItem imgPoserCarte = new ImageItem("Poser carte", null, ImageItem.LAYOUT_CENTER, "");
+				formJeu.append(imgPoserCarte);
+				formJeu.addCommand(exit);
+				imgPoserCarte.addCommand(commandPoserCarteBataille);
+				imgPoserCarte.setItemCommandListener(icl);
+			}
+			//Pas de bataille
+			else {
+				if (isPlayerWin) {			
+				formJeu.append(new StringItem("", "Vous avez gagner cette bataille !"));
+				}
+				else {
+					formJeu.append(new StringItem("", "Vous avez perdu cette bataille..."));
+				}
+				ImageItem imgRamasserCarte = new ImageItem("Ramasser carte", null, ImageItem.LAYOUT_CENTER, "");
+				formJeu.append(imgRamasserCarte);
+				formJeu.addCommand(exit);
+				imgRamasserCarte.addCommand(commandRamasserCarte);
+				imgRamasserCarte.setItemCommandListener(icl);
+			}
+		}
+		//On vient de ramasser les cartes
+		if (takeCards) {
+			formJeu.append(new StringItem("", "Next round ! Poser une carte !"));
+			ImageItem imgPoserCarte = new ImageItem("Poser carte", null, ImageItem.LAYOUT_CENTER, "");
+			formJeu.append(imgPoserCarte);
+			formJeu.addCommand(exit);
+			imgPoserCarte.addCommand(commandPoserCarte);
+			imgPoserCarte.setItemCommandListener(icl);
+		}
+		//Affichage de la carte du joueur
+		// ajout de vide a gauche pour center la carte
+		if (imgCarteJoueur != null) {
+			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteJoueur.getWidth()) / 2, 0));
+			formJeu.append(imgCarteJoueur);
+		}
+		
+
+		//Affichage de tous les éléments
+		monDisplay.setCurrent(formJeu);
+	}
+	
+	
+	
 
 	private void showJeu(Personne player) {
 		// pour redessiner completement
@@ -262,7 +421,7 @@ public class BatailleGUI extends MIDlet {
 			ImageItem imgTirerCarte = new ImageItem("Tirer carte", null, ImageItem.LAYOUT_CENTER, "");
 			formJeu.append(imgTirerCarte);
 			formJeu.addCommand(exit);
-			imgTirerCarte.addCommand(commandTirerCarte);
+			//imgTirerCarte.addCommand(commandTirerCarte);
 			imgTirerCarte.setItemCommandListener(icl);
 
 			Carte carteIA = tirerUneCarte(pileIA);
@@ -338,9 +497,9 @@ public class BatailleGUI extends MIDlet {
 	private void deplacerCarte(Pile cartesJoueur, Stack cartesJoueurEnJeu, Pile cartesIA, Stack cartesIAEnJeu,
 			boolean isPlayerWin) {
 		if (isPlayerWin) {
-			echangerCarte(cartesJoueur, cartesJoueurEnJeu, cartesIA, cartesIAEnJeu);
-		} else {
 			echangerCarte(cartesIA, cartesIAEnJeu, cartesJoueur, cartesJoueurEnJeu);
+		} else {
+			echangerCarte(cartesJoueur, cartesJoueurEnJeu, cartesIA, cartesIAEnJeu);
 		}
 	}
 
@@ -450,7 +609,7 @@ public class BatailleGUI extends MIDlet {
 		public void commandAction(Command c, Displayable d) {
 			if (d == formInfosJoueur) {
 				if (c == commandSaveInfosJoueur) {
-					showJeu(null);
+					_beginingOfTheGame();
 				}
 			}
 			if (c == newGame) {
@@ -478,8 +637,17 @@ public class BatailleGUI extends MIDlet {
 		// ItemCommandListener
 		public void commandAction(Command c, Item item) {
 			
-			if (c == commandTirerCarte) {
-				showJeu(null);
+			if (c == commandRetournerCarte) {
+				returnCard();
+			}
+			if (c == commandPoserCarte) {
+				pushCard(false);
+			}
+			if (c == commandPoserCarteBataille) {
+				pushCard(true);
+			}
+			if (c ==  commandRamasserCarte) {
+				takeCard();
 			}
 
 		}
