@@ -7,8 +7,6 @@ import java.util.Random;
 import java.util.Stack;
 import java.util.Vector;
 
-import javax.microedition.lcdui.Alert;
-import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.ChoiceGroup;
 import javax.microedition.lcdui.Command;
@@ -54,11 +52,9 @@ public class BatailleGUI extends MIDlet {
 	private Hashtable valeurCarte;
 
 	private Pile pileJoueur;
-	private Pile pileIA;	
+	private Pile pileIA;
 
 	private Stack cartesEnJeu;
-	private Stack carteJoueurEnJeu;
-	private Stack cartesIAEnJeu;
 
 	public BatailleGUI() {
 		// constructeur
@@ -77,8 +73,9 @@ public class BatailleGUI extends MIDlet {
 		carteJoueurToReturn = null;
 		carteIAToReturn = null;
 		formInfosJoueur.addCommand(commandSaveInfosJoueur);
-		/*carteJoueurToReturn = null;
-		carteIAToReturn = null;*/
+		/*
+		 * carteJoueurToReturn = null; carteIAToReturn = null;
+		 */
 
 		formInfosJoueur.setCommandListener(cl);
 		formJeu.setCommandListener(cl);
@@ -134,8 +131,6 @@ public class BatailleGUI extends MIDlet {
 		// distribute all cards : half for player, half for ia
 		Stack tempStackJoueur = new Stack();
 		Stack tempStackIA = new Stack();
-		carteJoueurEnJeu = new Stack();
-		cartesIAEnJeu = new Stack();
 		cartesEnJeu = new Stack();
 
 		// to preserve how many cartes have to be splitted between players
@@ -252,10 +247,11 @@ public class BatailleGUI extends MIDlet {
 
 		monDisplay.setCurrent(formInfosJoueur);
 	}
-	
+
 	private void _beginingOfTheGame() {
 		formJeu.deleteAll();
-		formJeu.append(new StringItem("", "Vous êtes sur le point de commencer la partie, cliquer sur poser carte pour commencer !"));
+		formJeu.append(new StringItem("",
+				"Vous êtes sur le point de commencer la partie, cliquer sur poser carte pour commencer !"));
 		ImageItem imgPoserCarte = new ImageItem("Poser carte", null, ImageItem.LAYOUT_CENTER, "");
 		formJeu.append(imgPoserCarte);
 		formJeu.addCommand(exit);
@@ -263,64 +259,68 @@ public class BatailleGUI extends MIDlet {
 		imgPoserCarte.setItemCommandListener(icl);
 		monDisplay.setCurrent(formJeu);
 	}
-	
+
 	private void pushCard(boolean isBataille) {
 		try {
 			if (pileJoueur.size() == 0 || pileIA.size() == 0) {
 				gestionFinDeJeu(pileJoueur.size() == 0, null);
-			} 
-			else {
+			} else {
 				System.out.println("Should stop");
-				//Gestion poser card quand c'est en pleine bataille 
+				// Gestion poser card quand c'est en pleine bataille
 				if (isBataille) {
-					//Il faut ajouter une carte de chaque joueur aux cartes en jeu				
+					// Il faut ajouter une carte de chaque joueur aux cartes en
+					// jeu
 					cartesEnJeu.push(tirerUneCarte(pileJoueur));
-					cartesEnJeu.push(tirerUneCarte(pileIA));				
-				}	
-				// On doit recheck si on a encore des carte parce qu'on en a potentiellement poser avec une bataille !
+					cartesEnJeu.push(tirerUneCarte(pileIA));
+				}
+				// On doit recheck si on a encore des carte parce qu'on en a
+				// potentiellement poser avec une bataille !
 				if (pileJoueur.size() == 0 || pileIA.size() == 0) {
 					gestionFinDeJeu(pileJoueur.size() == 0, null);
-				} 
-				else {
+				} else {
 					System.out.println("Should Stop");
-					//On va tirer les cartes mais on ne va afficher que le verso
-					//On tire la carte du joueur
+					// On va tirer les cartes mais on ne va afficher que le
+					// verso
+					// On tire la carte du joueur
 					carteJoueurToReturn = tirerUneCarte(pileJoueur);
-					//On tire la carte de l'IA
+					// On tire la carte de l'IA
 					carteIAToReturn = tirerUneCarte(pileIA);
-					//On ajoute les cartes qu'on vient de tirer aux cartes en jeu (cartes que le joueur qui va gagner va pouvoir récupérer
+					// On ajoute les cartes qu'on vient de tirer aux cartes en
+					// jeu (cartes que le joueur qui va gagner va pouvoir
+					// récupérer
 					cartesEnJeu.push(carteJoueurToReturn);
 					cartesEnJeu.push(carteIAToReturn);
-					///On prend le verso des cartes
-					Image imgCarteJoueur = Image.createImage(Image.createImage("cartes/noir_Verso.png"), 0, 0, 46, 64, 0);
+					/// On prend le verso des cartes
+					Image imgCarteJoueur = Image.createImage(Image.createImage("cartes/noir_Verso.png"), 0, 0, 46, 64,
+							0);
 					Image imgCarteIA = Image.createImage(Image.createImage("cartes/rouge_Verso.png"), 0, 0, 46, 64, 0);
-					_showJeu(imgCarteJoueur, imgCarteIA, true, false, false, false, false);			
-				}				
-			}			
+					_showJeu(imgCarteJoueur, imgCarteIA, true, false, false, false, false);
+				}
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private void returnCard() {
 		try {
-			
-			//Récupération de l'image de la carte joueur (tirer lors du pushCard)
-			Image imgCarteJoueur = Image.createImage(Image.createImage("cartes/" + carteJoueurToReturn.getPathImgFile()), 0, 0,
-					46, 64, 0);		
-			//Récupéation de l'image de la carte IA (tirer lors du pushCard)
-			Image imgCarteIA = Image.createImage(Image.createImage("cartes/" + carteIAToReturn.getPathImgFile()), 0, 0, 46, 64,
-					0);
-			//Checker qui a gagné		
+
+			// Récupération de l'image de la carte joueur (tirer lors du
+			// pushCard)
+			Image imgCarteJoueur = Image
+					.createImage(Image.createImage("cartes/" + carteJoueurToReturn.getPathImgFile()), 0, 0, 46, 64, 0);
+			// Récupéation de l'image de la carte IA (tirer lors du pushCard)
+			Image imgCarteIA = Image.createImage(Image.createImage("cartes/" + carteIAToReturn.getPathImgFile()), 0, 0,
+					46, 64, 0);
+			// Checker qui a gagné
 			Boolean isPlayerWin = carteJoueurGagne(carteJoueurToReturn, carteIAToReturn);
 			if (isPlayerWin == null) {
-				//Gérer la bataille
+				// Gérer la bataille
 				_showJeu(imgCarteJoueur, imgCarteIA, false, true, false, true, false);
-			}
-			else {
-				//Ce n'est pas une bataille, il faut ramasser les cartes
+			} else {
+				// Ce n'est pas une bataille, il faut ramasser les cartes
 				System.out.println("isPlayerWin : " + isPlayerWin);
 				deplacerCarte(pileJoueur, cartesEnJeu, pileIA, isPlayerWin.booleanValue());
 				System.out.println("cartes joueur : " + pileJoueur.size() + ", cartes ia : " + pileIA.size());
@@ -331,212 +331,117 @@ public class BatailleGUI extends MIDlet {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void takeCard() {
-		//Check if it is the end of the game
-		
-		//If it is not the end of the game
+		// Check if it is the end of the game
+
+		// If it is not the end of the game
 		_showJeu(null, null, false, false, true, false, false);
 	}
-	
-	
-	
+
 	/**
-	 * _showJeu will just show cards (images that we pass in arguments 
-	 * and add command depending of the moment of the game
+	 * _showJeu will just show cards (images that we pass in arguments and add
+	 * command depending of the moment of the game
+	 * 
 	 * @param imgCarteJoueur
 	 * @param imgCarteIA
 	 * @param pushCards
 	 * @param returnCards
 	 * @param takeCards
 	 * @param bataille
-	 * @param carteIAToReturn 
-	 * @param carteJoueurToReturn 
+	 * @param carteIAToReturn
+	 * @param carteJoueurToReturn
 	 */
-	private void _showJeu (Image imgCarteJoueur, Image imgCarteIA, boolean pushCards, boolean returnCards, boolean takeCards, boolean bataille, boolean isPlayerWin) {
+	private void _showJeu(Image imgCarteJoueur, Image imgCarteIA, boolean pushCards, boolean returnCards,
+			boolean takeCards, boolean bataille, boolean isPlayerWin) {
 		// pour redessiner completement
 		formJeu.deleteAll();
-		
-		//Affichage du nombre de cartes de l'IA
+
+		// Affichage du nombre de cartes de l'IA
 		formJeu.append(new StringItem("Nombre de cartes de l'IA", Integer.toString(pileIA.size())));
-		
-		//Affichage de la carte de l'ia
+
+		// Affichage de la carte de l'ia
 		// ajout de vide a gauche pour center la carte
 		if (imgCarteIA != null) {
 			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteIA.getWidth()) / 2, 0));
 			formJeu.append(imgCarteIA);
 		}
-		
-		
-		
-		//Affichage de l'action en fonction du moment du jeu
-		//pushCards est vrai quand on vient de poser de carte, il faut donc ensuite les retourner
+
+		// Affichage de l'action en fonction du moment du jeu
+		// pushCards est vrai quand on vient de poser de carte, il faut donc
+		// ensuite les retourner
 		if (pushCards) {
 			ImageItem imgRetournerCarte = new ImageItem("Retourner carte", null, ImageItem.LAYOUT_CENTER, "");
 			imgRetournerCarte.setItemCommandListener(icl);
 			imgRetournerCarte.addCommand(commandRetournerCarte);
 			formJeu.append(imgRetournerCarte);
-			formJeu.addCommand(exit);			
+			formJeu.addCommand(exit);
 		}
-		//On vient de retourner les cartes
+		// On vient de retourner les cartes
 		if (returnCards) {
-			//Gérer cas bataille
+			// Gérer cas bataille
 			if (bataille) {
 				formJeu.append(new StringItem("", "Bataille !!! Posez une carte et retournez-en une autre !"));
 				ImageItem imgPoserCarte = new ImageItem("Poser carte", null, ImageItem.LAYOUT_CENTER, "");
 				imgPoserCarte.setItemCommandListener(icl);
 				imgPoserCarte.addCommand(commandPoserCarteBataille);
 				formJeu.append(imgPoserCarte);
-				formJeu.addCommand(exit);							
+				formJeu.addCommand(exit);
 			}
-			//Pas de bataille
+			// Pas de bataille
 			else {
-				if (isPlayerWin) {			
-				formJeu.append(new StringItem("", "Vous avez gagner cette bataille !"));
-				}
-				else {
+				if (isPlayerWin) {
+					formJeu.append(new StringItem("", "Vous avez gagner cette bataille !"));
+				} else {
 					formJeu.append(new StringItem("", "Vous avez perdu cette bataille..."));
 				}
 				ImageItem imgRamasserCarte = new ImageItem("Ramasser carte", null, ImageItem.LAYOUT_CENTER, "");
 				imgRamasserCarte.setItemCommandListener(icl);
 				imgRamasserCarte.addCommand(commandRamasserCarte);
 				formJeu.append(imgRamasserCarte);
-				formJeu.addCommand(exit);								
+				formJeu.addCommand(exit);
 			}
 		}
-		//On vient de ramasser les cartes
+		// On vient de ramasser les cartes
 		if (takeCards) {
 			formJeu.append(new StringItem("", "Next round ! Poser une carte !"));
 			ImageItem imgPoserCarte = new ImageItem("Poser carte", null, ImageItem.LAYOUT_CENTER, "");
 			imgPoserCarte.setItemCommandListener(icl);
 			imgPoserCarte.addCommand(commandPoserCarte);
 			formJeu.append(imgPoserCarte);
-			formJeu.addCommand(exit);						
+			formJeu.addCommand(exit);
 		}
-		//Lorsqu'on met au dessus le Layout à "LAYOUT_CENTER" pour les boutons juste au dessus
-		//Le Layout par défaut devient alors le LAYOUT_CENTER, on utilise donc une image vide pour remettre le Layout par
-		//défaut à LAYOUT_LEFT
-		//On peut aussi utiliser le setLayout, mais il faudrait le faire pour chaque élément par la suite
+		// Lorsqu'on met au dessus le Layout à "LAYOUT_CENTER" pour les boutons
+		// juste au dessus
+		// Le Layout par défaut devient alors le LAYOUT_CENTER, on utilise donc
+		// une image vide pour remettre le Layout par
+		// défaut à LAYOUT_LEFT
+		// On peut aussi utiliser le setLayout, mais il faudrait le faire pour
+		// chaque élément par la suite
 		ImageItem fixLayout = new ImageItem("", null, ImageItem.LAYOUT_LEFT, "");
 		formJeu.append(fixLayout);
-		
-				
-		//Affichage de la carte du joueur
+
+		// Affichage de la carte du joueur
 		// ajout de vide a gauche pour center la carte
 		if (imgCarteJoueur != null) {
 			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteJoueur.getWidth()) / 2, 0));
 			formJeu.append(imgCarteJoueur);
 		}
-		//Affichage du nombre de cartes du joueur
+		// Affichage du nombre de cartes du joueur
 		formJeu.append(new StringItem("Nombre de cartes du joueur", Integer.toString(pileJoueur.size())));
-				
-		
 
-		//Affichage de tous les éléments
-		monDisplay.setCurrent(formJeu);
-	}
-	
-	
-	
-
-	private void showJeu(Personne player) {
-		// pour redessiner completement
-		formJeu.deleteAll();
-
-		try {
-			// Image imgStackJoueur =
-			// Image.createImage(Image.createImage("cartes/" +
-			// "rouge_Verso.png"), 0, 0, 46, 64, 0);
-			formJeu.append(new ImageItem("Nb cartes : " + String.valueOf(pileJoueur.size()), null,
-					ImageItem.LAYOUT_LEFT, null, ImageItem.PLAIN));
-			// new TextField("Nb cartes : ", String.valueOf(pileJoueur.size()),
-			// 15, TextField.UNEDITABLE));
-
-			Carte carteJoueur = tirerUneCarte(pileJoueur);
-			carteJoueurEnJeu.push(carteJoueur);
-			Image imgCarteJoueur = Image.createImage(Image.createImage("cartes/" + carteJoueur.getPathImgFile()), 0, 0,
-					46, 64, 0);
-
-			// ajout de vide a gauche pour center la carte
-			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteJoueur.getWidth()) / 2, 0));
-
-			int indexFormImgCarteJoueur = formJeu.append(imgCarteJoueur);
-
-			ImageItem imgTirerCarte = new ImageItem("Tirer carte", null, ImageItem.LAYOUT_CENTER, "");
-			formJeu.append(imgTirerCarte);
-			formJeu.addCommand(exit);
-			//imgTirerCarte.addCommand(commandTirerCarte);
-			imgTirerCarte.setItemCommandListener(icl);
-
-			Carte carteIA = tirerUneCarte(pileIA);
-			cartesIAEnJeu.push(carteIA);
-			Image imgCarteIA = Image.createImage(Image.createImage("cartes/" + carteIA.getPathImgFile()), 0, 0, 46, 64,
-					0);
-
-			// ajout de vide a gauche pour center la carte
-			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteIA.getWidth()) / 2, 0));
-
-			formJeu.append(imgCarteIA);
-
-			monDisplay.setCurrent(formJeu);
-
-			Boolean isPlayerWin = carteJoueurGagne(carteJoueur, carteIA);
-			if (isPlayerWin == null) {
-				System.out.println("Bataille !");
-				Alert alert = new Alert("Bataille !");
-				alert.setType(AlertType.INFO);
-				alert.setTimeout(5000);
-				monDisplay.setCurrent(alert, formJeu);
-
-				// FIXME: afficher la bataille au joueur (pas de popup ni de
-				// toast en jme, si ?)
-				// formJeu.get(indexFormImgCartesoueur).
-				// imgCarteJoueur.getGraphics().fillRect(0, 0,
-				// imgCarteJoueur.getWidth(), imgCarteJoueur.getHeight());
-
-				// chaque joueur prend la carte du haut de sa pile et la met en
-				// jeu face cachée avant un nouveau tirage
-				carteJoueurEnJeu.push(pileJoueur.pop());
-				cartesIAEnJeu.push(pileIA.pop());
-
-				// FIXME: avec le sleep l'app est bien bloquée mais malgré le
-				// setCurrent au dessus, on voit toujours les anciennes cartes
-				// (celle du tour d'avant la bataille) :-( WTF ?!
-				// try {
-				// Thread.sleep(2000);
-				// } catch (InterruptedException e) {
-				// // TODO Auto-generated catch block
-				// e.printStackTrace();
-				// }
-
-				showJeu(player);
-			} else {
-				System.out.println("isPlayerWin : " + isPlayerWin);
-				//deplacerCarte(pileJoueur, carteJoueurEnJeu, pileIA, cartesIAEnJeu, isPlayerWin.booleanValue());
-				System.out.println("cartes joueur : " + pileJoueur.size() + ", cartes ia : " + pileIA.size());
-			}
-
-			if (pileJoueur.size() == 0 || pileIA.size() == 0) {
-				gestionFinDeJeu(pileJoueur.size() == 0, player);
-			}
-
-		} catch (IOException exception) {
-			formJeu.append("erreur chargement image");
-		}
-
+		// Affichage de tous les éléments
 		monDisplay.setCurrent(formJeu);
 	}
 
 	private void gestionFinDeJeu(boolean isPlayerLooseTheGame, Personne joueur) {
 		formJeu.deleteAll();
-		System.out.println("test");
 		formJeu.append(new StringItem("Vainqueur : ",
 				!isPlayerLooseTheGame ? joueur == null ? "Joueur" : joueur.getPrenom() : "IA"));
 		formJeu.addCommand(newGame);
 	}
 
-	private void deplacerCarte(Pile cartesJoueur, Stack cartesEnJeu, Pile cartesIA,
-			boolean isPlayerWin) {
+	private void deplacerCarte(Pile cartesJoueur, Stack cartesEnJeu, Pile cartesIA, boolean isPlayerWin) {
 		if (isPlayerWin) {
 			ajouterCarteALaPile(cartesJoueur, cartesEnJeu);
 		} else {
@@ -549,15 +454,17 @@ public class BatailleGUI extends MIDlet {
 	}
 
 	private Carte tirerUneCarte(Pile stackDeCartes) {
-		//On ne doit pas prendre une carte au hasard
-		//On doit prendre la dernière carte de la pile
-		//et on doit mettre les cartes au début de la pile lorsqu'on les ramasses 
+		// On ne doit pas prendre une carte au hasard
+		// On doit prendre la dernière carte de la pile
+		// et on doit mettre les cartes au début de la pile lorsqu'on les
+		// ramasses
 		/*
-		Random random = new Random();
-		int indexCarteHasard = random.nextInt(stackDeCartes.size());
-		*/
+		 * Random random = new Random(); int indexCarteHasard =
+		 * random.nextInt(stackDeCartes.size());
+		 */
 		Carte carte = stackDeCartes.pop();
-		//Une fois qu'on a récupérer la carte, il faut la retirer de sa pile pour ne pas la retirer lors de bataille !
+		// Une fois qu'on a récupérer la carte, il faut la retirer de sa pile
+		// pour ne pas la retirer lors de bataille !
 		Stack tmpStack = new Stack();
 		tmpStack.push(carte);
 		stackDeCartes.retirerCarte(tmpStack);
@@ -678,14 +585,14 @@ public class BatailleGUI extends MIDlet {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				      notifyDestroyed();
-			    }
+					notifyDestroyed();
+				}
 			}
 		}
 
 		// ItemCommandListener
 		public void commandAction(Command c, Item item) {
-			
+
 			if (c == commandRetournerCarte) {
 				returnCard();
 			}
@@ -695,7 +602,7 @@ public class BatailleGUI extends MIDlet {
 			if (c == commandPoserCarteBataille) {
 				pushCard(true);
 			}
-			if (c ==  commandRamasserCarte) {
+			if (c == commandRamasserCarte) {
 				takeCard();
 			}
 
