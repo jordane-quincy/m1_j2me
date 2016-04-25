@@ -46,6 +46,7 @@ public class BatailleGUI extends MIDlet {
 	private RecordStore rs = null;
 	private Carte carteJoueurToReturn;
 	private Carte carteIAToReturn;
+	private boolean _isPlayerWin = false;
 
 	Random random;
 	private Hashtable enseigneCarte;
@@ -287,7 +288,7 @@ public class BatailleGUI extends MIDlet {
 					carteIAToReturn = tirerUneCarte(pileIA);
 					// On ajoute les cartes qu'on vient de tirer aux cartes en
 					// jeu (cartes que le joueur qui va gagner va pouvoir
-					// récupérer
+					// récupérer 
 					cartesEnJeu.push(carteJoueurToReturn);
 					cartesEnJeu.push(carteIAToReturn);
 					/// On prend le verso des cartes
@@ -320,9 +321,9 @@ public class BatailleGUI extends MIDlet {
 				// Gérer la bataille
 				_showJeu(imgCarteJoueur, imgCarteIA, false, true, false, true, false);
 			} else {
+				_isPlayerWin = isPlayerWin.booleanValue();
 				// Ce n'est pas une bataille, il faut ramasser les cartes
 				System.out.println("isPlayerWin : " + isPlayerWin);
-				deplacerCarte(pileJoueur, cartesEnJeu, pileIA, isPlayerWin.booleanValue());
 				System.out.println("cartes joueur : " + pileJoueur.size() + ", cartes ia : " + pileIA.size());
 				_showJeu(imgCarteJoueur, imgCarteIA, false, true, false, false, isPlayerWin.booleanValue());
 			}
@@ -333,8 +334,7 @@ public class BatailleGUI extends MIDlet {
 	}
 
 	private void takeCard() {
-		// Check if it is the end of the game
-
+		deplacerCarte(pileJoueur, cartesEnJeu, pileIA, _isPlayerWin);
 		// If it is not the end of the game
 		_showJeu(null, null, false, false, true, false, false);
 	}
