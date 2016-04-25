@@ -19,7 +19,6 @@ import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.ImageItem;
 import javax.microedition.lcdui.Item;
 import javax.microedition.lcdui.ItemCommandListener;
-import javax.microedition.lcdui.Spacer;
 import javax.microedition.lcdui.StringItem;
 import javax.microedition.lcdui.TextField;
 import javax.microedition.midlet.MIDlet;
@@ -358,13 +357,14 @@ public class BatailleGUI extends MIDlet {
 		formJeu.deleteAll();
 
 		// Affichage du nombre de cartes de l'IA
-		formJeu.append(new StringItem("Nombre de cartes de l'IA", Integer.toString(pileIA.size())));
+		StringItem nbCartesIA = new StringItem("Nombre de cartes de l'IA", Integer.toString(pileIA.size()));
+		nbCartesIA.setLayout(StringItem.LAYOUT_LEFT);
+		formJeu.append(nbCartesIA);
 
 		// Affichage de la carte de l'ia
-		// ajout de vide a gauche pour center la carte
 		if (imgCarteIA != null) {
-			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteIA.getWidth()) / 2, 0));
-			formJeu.append(imgCarteIA);
+			ImageItem imgItemCarteIA = new ImageItem("", imgCarteIA, ImageItem.LAYOUT_CENTER, "");
+			formJeu.append(imgItemCarteIA);
 		}
 
 		// Affichage de l'action en fonction du moment du jeu
@@ -411,24 +411,17 @@ public class BatailleGUI extends MIDlet {
 			formJeu.append(imgPoserCarte);
 			formJeu.addCommand(exit);
 		}
-		// Lorsqu'on met au dessus le Layout à "LAYOUT_CENTER" pour les boutons
-		// juste au dessus
-		// Le Layout par défaut devient alors le LAYOUT_CENTER, on utilise donc
-		// une image vide pour remettre le Layout par
-		// défaut à LAYOUT_LEFT
-		// On peut aussi utiliser le setLayout, mais il faudrait le faire pour
-		// chaque élément par la suite
-		ImageItem fixLayout = new ImageItem("", null, ImageItem.LAYOUT_LEFT, "");
-		formJeu.append(fixLayout);
 
 		// Affichage de la carte du joueur
-		// ajout de vide a gauche pour center la carte
 		if (imgCarteJoueur != null) {
-			formJeu.append(new Spacer((monDisplay.getCurrent().getWidth() - imgCarteJoueur.getWidth()) / 2, 0));
-			formJeu.append(imgCarteJoueur);
+			ImageItem imgItemCarteJoueur = new ImageItem("", imgCarteJoueur,
+					ImageItem.LAYOUT_NEWLINE_BEFORE | ImageItem.LAYOUT_CENTER, "");
+			formJeu.append(imgItemCarteJoueur);
 		}
 		// Affichage du nombre de cartes du joueur
-		formJeu.append(new StringItem("Nombre de cartes du joueur", Integer.toString(pileJoueur.size())));
+		StringItem nbCartesJoueur = new StringItem("Nombre de cartes du joueur", Integer.toString(pileJoueur.size()));
+		nbCartesJoueur.setLayout(StringItem.LAYOUT_LEFT);
+		formJeu.append(nbCartesJoueur);
 
 		// Affichage de tous les éléments
 		monDisplay.setCurrent(formJeu);
