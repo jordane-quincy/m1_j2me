@@ -1,5 +1,11 @@
 package bataille;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class Carte {
 
 	private int valeur;
@@ -8,12 +14,55 @@ public class Carte {
 	private String enseigneString;
 	private String pathImgFile;
 
+	private Carte() {
+		
+	}
 	public Carte(int valeur, String valeurString, String enseigne, String enseigneString, String pathImgFile) {
 		this.valeur = valeur;
 		this.valeurString = valeurString;
 		this.enseigne = enseigne;
 		this.enseigneString = enseigneString;
 		this.pathImgFile = pathImgFile;
+	}
+	
+	static Carte initialise(byte[] data) {
+		Carte c = new Carte();
+
+		ByteArrayInputStream bis = new ByteArrayInputStream(data);
+		DataInputStream dis = new DataInputStream(bis);
+
+		try {
+			c.setValeur(dis.readInt());
+			c.setValeurString(dis.readUTF());
+			c.setEnseigne(dis.readUTF());
+			c.setEnseigneString(dis.readUTF());
+			c.setPathImgFile(dis.readUTF());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return c;
+	}
+
+	byte[] serialise() {
+		byte[] data = null;
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+
+		try {
+			dos.writeInt(this.getValeur());
+			dos.writeUTF(this.getValeurString());
+			dos.writeUTF(this.getEnseigne());
+			dos.writeUTF(this.getEnseigneString());
+			dos.writeUTF(this.getPathImgFile());
+			data = bos.toByteArray();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return data;
 	}
 
 	/**
