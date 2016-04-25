@@ -24,11 +24,12 @@ import javax.microedition.lcdui.TextField;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 import javax.microedition.rms.RecordEnumeration;
-import javax.microedition.rms.RecordFilter;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
 
 public class BatailleGUI extends MIDlet {
+
+	private final String RMS_DB_NAME = "recordStoreName";
 
 	private Display monDisplay;
 	private Form formInfosJoueur;
@@ -56,6 +57,12 @@ public class BatailleGUI extends MIDlet {
 
 	private Stack cartesEnJeu;
 
+	private Personne player;
+	private TextField nom;
+	private TextField prenom;
+	private Gauge age;
+	private ChoiceGroup sexeChoiceGroup;
+
 	public BatailleGUI() {
 		// constructeur
 		monDisplay = Display.getDisplay(this);
@@ -73,9 +80,6 @@ public class BatailleGUI extends MIDlet {
 		carteJoueurToReturn = null;
 		carteIAToReturn = null;
 		formInfosJoueur.addCommand(commandSaveInfosJoueur);
-		/*
-		 * carteJoueurToReturn = null; carteIAToReturn = null;
-		 */
 
 		formInfosJoueur.setCommandListener(cl);
 		formJeu.setCommandListener(cl);
@@ -177,57 +181,30 @@ public class BatailleGUI extends MIDlet {
 
 	protected void startApp() throws MIDletStateChangeException {
 		System.out.println("Lancement ...");
-		/*
-		 * formInfosJoueur.append(new Gauge("Age (0-10)", true, 10, 2)); try {
-		 * formInfosJoueur.append(Image.createImage("java_black.png")); } catch
-		 * (IOException exception) { formInfosJoueur.append(
-		 * "erreur chargement image"); }
-		 * 
-		 * formInfosJoueur.append(new TextField("label", "text", 10,
-		 * TextField.ANY));
-		 * 
-		 * formInfosJoueur.append(new ChoiceGroup("Sexe", Choice.EXCLUSIVE, new
-		 * String[] { "Homme", "Femme" }, null));
-		 * 
-		 * DateField dateField = new DateField("date :", DateField.DATE);
-		 * dateField.setDate(new Date()); formInfosJoueur.append(dateField);
-		 * 
-		 * monDisplay.setCurrent(formInfosJoueur);
-		 */
+
 		System.out.println("Start bdd part (RMS)...");
 		RMS_loadDB();
 
-		//
-		// Personne p1 = new Personne();
-		// p1.setId(0);
-		// p1.setNom("Quincy");
-		// RMS_addRow(p1);
-		//
-		// Personne p2 = new Personne();
-		// p2.setId(1);
-		// p2.setNom("Duriez");
-		// RMS_addRow(p2);
-
-		Personne finded = RMS_searchDB("Duriez");
-		if (finded != null) {
-			System.out.println("Found : " + finded.getId());
+		player = RMS_findInDB();
+		if (player != null) {
+			System.out.println("Found player : " + player.getId());
 		} else {
-			System.err.println("J-B not found!");
+			System.err.println("Nobody found.");
 		}
 
-		Personne player = RMS_getPlayerFromDB();
-
 		showInfosJoueur(player);
-
 	}
 
 	private void showInfosJoueur(Personne player) {
-		formInfosJoueur.append(new TextField("Nom", player == null ? "nom" : player.getNom(), 10, TextField.ANY));
-		formInfosJoueur
-				.append(new TextField("Prenom", player == null ? "prenom" : player.getPrenom(), 10, TextField.ANY));
-		formInfosJoueur.append(new Gauge("Age (0-99)", true, 99, player == null ? 18 : player.getAge()));
+		nom = new TextField("Nom", player == null ? "nom" : player.getNom(), 10, TextField.ANY);
+		prenom = new TextField("Prenom", player == null ? "prenom" : player.getPrenom(), 10, TextField.ANY);
+		age = new Gauge("Age (0-99)", true, 99, player == null ? 18 : player.getAge());
+		sexeChoiceGroup = new ChoiceGroup("Sexe", Choice.EXCLUSIVE, Enum.sexe, null);
 
-		ChoiceGroup sexeChoiceGroup = new ChoiceGroup("Sexe", Choice.EXCLUSIVE, Enum.sexe, null);
+		formInfosJoueur.append(nom);
+		formInfosJoueur.append(prenom);
+		formInfosJoueur.append(age);
+
 		if (player != null) {
 			int itemIndexToSelect = 0;
 			for (int i = 0; i < sexeChoiceGroup.size(); i++) {
@@ -287,7 +264,7 @@ public class BatailleGUI extends MIDlet {
 					carteIAToReturn = tirerUneCarte(pileIA);
 					// On ajoute les cartes qu'on vient de tirer aux cartes en
 					// jeu (cartes que le joueur qui va gagner va pouvoir
-					// récupérer 
+					// récupérer
 					cartesEnJeu.push(carteJoueurToReturn);
 					cartesEnJeu.push(carteIAToReturn);
 					/// On prend le verso des cartes
@@ -478,7 +455,7 @@ public class BatailleGUI extends MIDlet {
 
 	private void RMS_loadDB() {
 		try {
-			rs = RecordStore.openRecordStore("recordStoreName", true);
+			rs = RecordStore.openRecordStore(RMS_DB_NAME, true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -494,38 +471,11 @@ public class BatailleGUI extends MIDlet {
 		}
 	}
 
-	private Personne RMS_searchDB(final String nomRecherche) {
-
-		Personne foundPeople = null;
-
-		RecordFilter rf = new RecordFilter() {
-
-			public boolean matches(byte[] candidateData) {
-				Personne pInDb = Personne.initialise(candidateData);
-
-				return nomRecherche.equalsIgnoreCase(pInDb.getNom());
-			}
-		};
-
-		try {
-			RecordEnumeration enum = rs.enumerateRecords(rf, null, false);
-			if (enum.hasNextElement()) {
-				byte[] personFoundData = enum.nextRecord();
-				Personne personFound = Personne.initialise(personFoundData);
-				foundPeople = personFound;
-			}
-		} catch (Exception e) { // TODO Auto-generated catch block
-								// e.printStackTrace();
-		}
-
-		return foundPeople;
-	}
-
-	private Personne RMS_getPlayerFromDB() {
-
+	private Personne RMS_findInDB() {
 		Personne foundPeople = null;
 
 		try {
+			// pas de RecordFilter car on prend la première personne en bdd
 			RecordEnumeration enum = rs.enumerateRecords(null, null, false);
 			if (enum.hasNextElement()) {
 				byte[] personFoundData = enum.nextRecord();
@@ -539,18 +489,44 @@ public class BatailleGUI extends MIDlet {
 		return foundPeople;
 	}
 
-	private void RMS_addRow(Personne p) {
-		if (p == null) {
-			System.err.println("No personne to store");
-		} else {
-			byte[] dataInBytes = p.serialise();
+	private void RMS_savePlayer() {
+		Personne p = player;
+
+		boolean isNewPlayer = (p == null);
+		if (isNewPlayer) {
+			p = new Personne();
+
 			try {
-				rs.addRecord(dataInBytes, 0, dataInBytes.length);
+				p.setId(rs.getNextRecordID());
 			} catch (RecordStoreException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		System.out.println("isNewPlayer " + isNewPlayer + ", p.getId() : " + p.getId());
+
+		p.setNom(nom.getString());
+		p.setPrenom(prenom.getString());
+		p.setAge(age.getValue());
+		p.setSexe(sexeChoiceGroup.getString(sexeChoiceGroup.getSelectedIndex()));
+
+		// maj variable globale
+		player = p;
+
+		byte[] dataInBytes = p.serialise();
+		try {
+			if (isNewPlayer) {
+				// insertion des nouvelles infos
+				rs.addRecord(dataInBytes, 0, dataInBytes.length);
+			} else {
+				// maj des anciennes infos
+				rs.setRecord(p.getId(), dataInBytes, 0, dataInBytes.length);
+			}
+		} catch (RecordStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	class GestionEvenements implements CommandListener, ItemCommandListener {
@@ -558,6 +534,7 @@ public class BatailleGUI extends MIDlet {
 		public void commandAction(Command c, Displayable d) {
 			if (d == formInfosJoueur) {
 				if (c == commandSaveInfosJoueur) {
+					RMS_savePlayer();
 					_beginingOfTheGame();
 				}
 			}
