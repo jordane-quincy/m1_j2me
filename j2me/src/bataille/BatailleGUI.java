@@ -56,6 +56,9 @@ public class BatailleGUI extends MIDlet {
 	private Pile pileIA;
 
 	private Stack cartesEnJeu;
+	
+	private int nbrWinJoueur = 0;
+	private int nbrWinIA = 0;
 
 	public BatailleGUI() {
 		// constructeur
@@ -266,7 +269,6 @@ public class BatailleGUI extends MIDlet {
 			if (pileJoueur.size() == 0 || pileIA.size() == 0) {
 				gestionFinDeJeu(pileJoueur.size() == 0, null);
 			} else {
-				System.out.println("Should stop");
 				// Gestion poser card quand c'est en pleine bataille
 				if (isBataille) {
 					// Il faut ajouter une carte de chaque joueur aux cartes en
@@ -279,7 +281,6 @@ public class BatailleGUI extends MIDlet {
 				if (pileJoueur.size() == 0 || pileIA.size() == 0) {
 					gestionFinDeJeu(pileJoueur.size() == 0, null);
 				} else {
-					System.out.println("Should Stop");
 					// On va tirer les cartes mais on ne va afficher que le
 					// verso
 					// On tire la carte du joueur
@@ -322,6 +323,12 @@ public class BatailleGUI extends MIDlet {
 				_showJeu(imgCarteJoueur, imgCarteIA, false, true, false, true, false);
 			} else {
 				_isPlayerWin = isPlayerWin.booleanValue();
+				if (_isPlayerWin) {
+					nbrWinJoueur++;
+				}
+				else {
+					nbrWinIA++;
+				}
 				// Ce n'est pas une bataille, il faut ramasser les cartes
 				System.out.println("isPlayerWin : " + isPlayerWin);
 				System.out.println("cartes joueur : " + pileJoueur.size() + ", cartes ia : " + pileIA.size());
@@ -438,6 +445,13 @@ public class BatailleGUI extends MIDlet {
 		formJeu.deleteAll();
 		formJeu.append(new StringItem("Vainqueur : ",
 				!isPlayerLooseTheGame ? joueur == null ? "Joueur" : joueur.getPrenom() : "IA"));
+		if (!isPlayerLooseTheGame) {
+			formJeu.append(new StringItem("", "Vous avez gagné en remportant " + nbrWinJoueur + " manches! (l'IA en a gagné " + nbrWinIA + ")"));
+		}
+		else {
+			formJeu.append(new StringItem("", "L'IA a gagné en remportant " + nbrWinIA + " manches! (Vous en avez gagné " + nbrWinJoueur + ")"));
+		}
+		
 		formJeu.addCommand(newGame);
 	}
 
