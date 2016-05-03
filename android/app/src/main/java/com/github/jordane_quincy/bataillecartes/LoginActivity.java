@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AutoCompleteTextView;
@@ -18,6 +19,9 @@ import android.widget.Toast;
  * A login screen that offers login
  */
 public class LoginActivity extends AppCompatActivity {
+
+    // TAG is used to debug in Android logcat console
+    private static final String TAG = LoginActivity.class.getName();
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -56,9 +60,8 @@ public class LoginActivity extends AppCompatActivity {
         datasource = new PersonneDataSource(this);
         datasource.open();
 
-        Personne joueurEnBdd = datasource.getPersonneInDb();
-        datasource.deletePersonne(joueurEnBdd);
-        populateAutocomplete(joueurEnBdd);
+        joueurBdd = datasource.getPersonneInDb();
+        populateAutocomplete(joueurBdd);
 
         Button mSaveButton = (Button) findViewById(R.id.save_button);
         mSaveButton.setOnClickListener(new OnClickListener() {
@@ -82,14 +85,11 @@ public class LoginActivity extends AppCompatActivity {
 
         Personne personne = joueurBdd == null ? new Personne() : joueurBdd;
 
+        personne.setId(0); //un seul joueur a sauver
         personne.setNom(mNomView.getText().toString());
         personne.setPrenom(mPrenomView.getText().toString());
         personne.setAge(mSeekBarAge.getProgress());
         personne.setSexe(mRadioBtnHomme.isChecked() ? mRadioBtnHomme.getText().toString() : mRadioBtnFemme.getText().toString());
-
-        int idRadioBtnSexeSelected = mRadioGroup.getCheckedRadioButtonId();
-        RadioButton radioSexeBtn = (RadioButton) findViewById(idRadioBtnSexeSelected);
-        personne.setSexe(radioSexeBtn.getText().toString());
 
         boolean error = false;
 
@@ -115,10 +115,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void savePersonneToDb(Personne personne){
+        Log.d(TAG, "savePersonneToDb : " + personne);
         datasource.createPersonne(personne);
     }
 
     private void populateAutocomplete(Personne personne){
+        Log.d(TAG, "populateAutocomplete : " + personne);
         if(personne != null){
             joueurBdd = personne;
             mNomView.setText(personne.getNom());

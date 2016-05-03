@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ public class PersonneDataSource {
     private SQLiteDatabase database;
     private MySQLiteHelper dbHelper;
     private String[] allColumns = { MySQLiteHelper.COLUMN_ID,
-            MySQLiteHelper.COLUMN_NOM, MySQLiteHelper.COLUMN_PRENOM };
+            MySQLiteHelper.COLUMN_NOM, MySQLiteHelper.COLUMN_PRENOM, MySQLiteHelper.COLUMN_AGE, MySQLiteHelper.COLUMN_SEXE };
 
     public PersonneDataSource(Context context) {
         dbHelper = new MySQLiteHelper(context);
@@ -31,15 +32,20 @@ public class PersonneDataSource {
 
     public Personne createPersonne(Personne personne) {
         ContentValues values = new ContentValues();
+        values.put(MySQLiteHelper.COLUMN_ID, personne.getId());
         values.put(MySQLiteHelper.COLUMN_NOM, personne.getNom());
         values.put(MySQLiteHelper.COLUMN_PRENOM, personne.getPrenom());
+        values.put(MySQLiteHelper.COLUMN_AGE, personne.getAge());
+        values.put(MySQLiteHelper.COLUMN_SEXE, personne.getSexe());
         long insertId = database.insertWithOnConflict(MySQLiteHelper.TABLE_PERSONNE, null,
-                values, SQLiteDatabase.CONFLICT_REPLACE);
+                values, SQLiteDatabase.CONFLICT_REPLACE); // SQLiteDatabase.CONFLICT_REPLACE == insert or update si id existant
+        Log.d("LoginActivity - Db", "personne.getAge() : " + personne.getAge());
         Cursor cursor = database.query(MySQLiteHelper.TABLE_PERSONNE,
                 allColumns, MySQLiteHelper.COLUMN_ID + " = " + insertId, null,
                 null, null, null);
         cursor.moveToFirst();
         Personne newPersonne = cursorToPersonne(cursor);
+        Log.d("LoginActivity - Db", "newPersonne .getAge() : " + newPersonne.getAge());
         cursor.close();
         return newPersonne;
     }
@@ -56,6 +62,8 @@ public class PersonneDataSource {
         personne.setId(cursor.getInt(0));
         personne.setNom(cursor.getString(1));
         personne.setPrenom(cursor.getString(2));
+        personne.setAge(cursor.getInt(3));
+        personne.setSexe(cursor.getString(4));
         return personne;
     }
 
@@ -80,6 +88,12 @@ public class PersonneDataSource {
     public Personne getPersonneInDb() {
         List<Personne> personneLst = getAllPersonneInDb();
 
-        return personneLst.isEmpty() ? null : personneLst.get(0);
+        Personne joueur = null;
+        for(Personne p : personneLst){
+            if(0 == p.getId()){
+                joueur = p;
+            }
+        }
+        return joueur;
     }
 }
