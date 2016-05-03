@@ -109,8 +109,7 @@ public class LoginActivity extends AppCompatActivity {
             savePersonneToDb(personne);
 
             Intent i = new Intent(getApplicationContext(), BatailleActivity.class);
-            i.putExtra("nom", personne.getNom());
-            i.putExtra("prenom", personne.getPrenom());
+            i.putExtra("personne", personne);
             startActivity(i);
         }
     }

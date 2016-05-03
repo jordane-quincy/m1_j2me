@@ -1,10 +1,13 @@
 package com.github.jordane_quincy.bataillecartes;
 
+import java.io.Serializable;
+
 /**
  * Created by jordane on 03/05/2016.
  */
-public class Personne {
+public class Personne implements Serializable {
 
+    static final long serialVersionUID = 42L;
 
         private int id;
         private String nom;
