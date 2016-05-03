@@ -26,6 +26,8 @@ public class LoginActivity extends AppCompatActivity {
     private AutoCompleteTextView mNomView;
     private AutoCompleteTextView mPrenomView;
 
+    private PersonneDataSource datasource;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +36,11 @@ public class LoginActivity extends AppCompatActivity {
         mNomView = (AutoCompleteTextView) findViewById(R.id.nom);
         mPrenomView = (AutoCompleteTextView) findViewById(R.id.prenom);
 
-        // populateAutoComplete();
+        datasource = new PersonneDataSource(this);
+        datasource.open();
+
+        Personne personne = datasource.getPersonneInDb();
+        populateAutocomplete(personne);
 
         Button mSaveButton = (Button) findViewById(R.id.save_button);
         mSaveButton.setOnClickListener(new OnClickListener() {
@@ -71,34 +77,44 @@ public class LoginActivity extends AppCompatActivity {
         mPrenomView.setError(null);
 
         // Store values at the time of the nom attempt.
-        String nom = mNomView.getText().toString();
-        String prenom = mPrenomView.getText().toString();
+        Personne personne = new Personne();
+
+        personne.setNom(mNomView.getText().toString());
+        personne.setPrenom(mPrenomView.getText().toString());
 
         boolean error = false;
 
         // Check infos
-        if (TextUtils.isEmpty(nom)) {
+        if (TextUtils.isEmpty(personne.getNom())) {
             mNomView.setError(getString(R.string.error_field_required));
             error = true;
         }
-        if (TextUtils.isEmpty(prenom)) {
+        if (TextUtils.isEmpty(personne.getPrenom())) {
             mPrenomView.setError(getString(R.string.error_field_required));
             error = true;
         }
 
         if(!error){
-            // Show a progress spinner, and kick off a background task to
-            // perform the user nom attempt.
+            Toast.makeText(getApplicationContext(), personne.toString(), Toast.LENGTH_SHORT).show();
 
-
-            Toast.makeText(getApplicationContext(),"nom : "+nom, Toast.LENGTH_SHORT).show();
+            savePersonneToDb(personne);
 
             Intent i = new Intent(getApplicationContext(), BatailleActivity.class);
-            i.putExtra("nom", nom);
-            i.putExtra("prenom", prenom);
-                    startActivity(i);
+            i.putExtra("nom", personne.getNom());
+            i.putExtra("prenom", personne.getPrenom());
+            startActivity(i);
         }
     }
 
+    private void savePersonneToDb(Personne personne){
+        datasource.createPersonne(personne);
+    }
+
+    private void populateAutocomplete(Personne personne){
+        if(personne != null){
+            mNomView.setText(personne.getNom());
+            mPrenomView.setText(personne.getPrenom());
+        }
+    }
 }
 
