@@ -18,8 +18,9 @@ public class BatailleActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();
-        String login = intent.getStringExtra("login");
-        Toast.makeText(getApplicationContext(), "login message : " + login, Toast.LENGTH_SHORT).show();
+        String nom = intent.getStringExtra("nom");
+        String prenom = intent.getStringExtra("prenom");
+        Toast.makeText(getApplicationContext(), "login message : " + nom +", prenom : "+prenom, Toast.LENGTH_SHORT).show();
 
     }
 

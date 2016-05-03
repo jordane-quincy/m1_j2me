@@ -23,14 +23,17 @@ public class LoginActivity extends AppCompatActivity {
     private static final int REQUEST_READ_CONTACTS = 0;
 
     // UI references.
-    private AutoCompleteTextView mLoginView;
+    private AutoCompleteTextView mNomView;
+    private AutoCompleteTextView mPrenomView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
-        mLoginView = (AutoCompleteTextView) findViewById(R.id.email);
+        mNomView = (AutoCompleteTextView) findViewById(R.id.nom);
+        mPrenomView = (AutoCompleteTextView) findViewById(R.id.prenom);
+
         // populateAutoComplete();
 
         Button mSaveButton = (Button) findViewById(R.id.save_button);
@@ -64,24 +67,36 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void saveInfos() {
         // Reset errors.
-        mLoginView.setError(null);
+        mNomView.setError(null);
+        mPrenomView.setError(null);
 
-        // Store values at the time of the login attempt.
-        String login = mLoginView.getText().toString();
+        // Store values at the time of the nom attempt.
+        String nom = mNomView.getText().toString();
+        String prenom = mPrenomView.getText().toString();
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(login)) {
-            mLoginView.setError(getString(R.string.error_field_required));
-        } else {
+        boolean error = false;
+
+        // Check infos
+        if (TextUtils.isEmpty(nom)) {
+            mNomView.setError(getString(R.string.error_field_required));
+            error = true;
+        }
+        if (TextUtils.isEmpty(prenom)) {
+            mPrenomView.setError(getString(R.string.error_field_required));
+            error = true;
+        }
+
+        if(!error){
             // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
+            // perform the user nom attempt.
 
 
-            Toast.makeText(getApplicationContext(),"login : "+login, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"nom : "+nom, Toast.LENGTH_SHORT).show();
 
             Intent i = new Intent(getApplicationContext(), BatailleActivity.class);
-            i.putExtra("login", login);
-            startActivity(i);
+            i.putExtra("nom", nom);
+            i.putExtra("prenom", prenom);
+                    startActivity(i);
         }
     }
 
