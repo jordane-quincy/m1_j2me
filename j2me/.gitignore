@@ -1,5 +1,5 @@
 /bin/
 /.mtj.tmp/
 
-*.mtj
-*build.properties
+**/.mtj
+**/build.properties

@@ -1,5 +1,6 @@
 package com.github.jordane_quincy.bataillecartes;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -77,6 +78,10 @@ public class LoginActivity extends AppCompatActivity {
 
 
             Toast.makeText(getApplicationContext(),"login : "+login, Toast.LENGTH_SHORT).show();
+
+            Intent i = new Intent(getApplicationContext(), BatailleActivity.class);
+            i.putExtra("login", login);
+            startActivity(i);
         }
     }
 
