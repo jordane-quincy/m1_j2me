@@ -9,11 +9,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.SeekBar;
 import android.widget.Toast;
+
+import it.moondroid.seekbarhint.library.SeekBarHint;
 
 /**
  * A login screen that offers login
@@ -32,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
     private Personne joueurBdd = null ;
     private AutoCompleteTextView mNomView;
     private AutoCompleteTextView mPrenomView;
-    private ProgressBar mSeekBarAge;
+    private SeekBarHint mSeekBarAge;
     private RadioGroup mRadioGroup;
     private RadioButton mRadioBtnHomme;
     private RadioButton mRadioBtnFemme;
@@ -46,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         // Set up the login form.
         mNomView = (AutoCompleteTextView) findViewById(R.id.nom);
         mPrenomView = (AutoCompleteTextView) findViewById(R.id.prenom);
-        mSeekBarAge = (SeekBar) findViewById(R.id.seekBar);
+        mSeekBarAge = (SeekBarHint) findViewById(R.id.seekBar);
         mRadioGroup = (RadioGroup) findViewById(R.id.radioGroup);
         mRadioBtnHomme = (RadioButton) findViewById(R.id.radioButton);
         mRadioBtnFemme = (RadioButton) findViewById(R.id.radioButton2);
@@ -56,6 +56,12 @@ public class LoginActivity extends AppCompatActivity {
         mSeekBarAge.setMax(99);
         mSeekBarAge.setProgress(18);
         mSeekBarAge.incrementProgressBy(1);
+        mSeekBarAge.setOnProgressChangeListener(new SeekBarHint.OnSeekBarHintProgressChangeListener() {
+            @Override
+            public String onHintTextChanged(SeekBarHint seekBarHint, int progress) {
+                return String.format("%s an"+ (progress > 1 ? "s":""), progress);
+            }
+        });
 
         datasource = new PersonneDataSource(this);
         datasource.open();
