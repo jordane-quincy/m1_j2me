@@ -61,17 +61,26 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <it.moondroid.seekbarhint.library.SeekBarHint
+            <TextView
+            android:id="@+id/ageLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/prompt_age" />
+                <it.moondroid.seekbarhint.library.SeekBarHint
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/seekBar"
+                    android:layout_gravity="center_horizontal"
+                    hint:popupWidth="100dp"
+                    hint:yOffset="300dp"
+                    hint:popupStyle="fixed"/>
+
+
+            <TextView
+                android:id="@+id/sexeLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/seekBar"
-                android:text="@string/prompt_age"
-                android:hint="@string/prompt_age"
-                android:layout_gravity="center_horizontal"
-                hint:popupWidth="100dp"
-                hint:yOffset="300dp"
-                hint:popupStyle="fixed"/>
-
+                android:text="@string/prompt_sexe" />
             <RadioGroup
                 android:id="@+id/radioGroup"
                 android:layout_width="wrap_content"
@@ -99,7 +108,6 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/action_save"
                 android:textStyle="bold" />
-
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

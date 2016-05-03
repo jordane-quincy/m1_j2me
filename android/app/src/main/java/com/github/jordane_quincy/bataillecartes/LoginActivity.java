@@ -59,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         mSeekBarAge.setOnProgressChangeListener(new SeekBarHint.OnSeekBarHintProgressChangeListener() {
             @Override
             public String onHintTextChanged(SeekBarHint seekBarHint, int progress) {
-                return String.format("%s an"+ (progress > 1 ? "s":""), progress);
+                return String.format("%s an" + (progress > 1 ? "s" : ""), progress);
             }
         });
 

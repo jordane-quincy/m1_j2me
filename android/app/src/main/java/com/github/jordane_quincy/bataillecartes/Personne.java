@@ -105,7 +105,7 @@ public class Personne implements Serializable {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return "Personne id " + this.id + "\n nom :" + this.nom + "\n prenom :" + this.prenom+ "\n age :" + this.age+ "\n sexe :" + this.sexe;
+        return "Personne id " + this.id + "\n nom : " + this.nom + "\n prenom : " + this.prenom+ "\n age : " + this.age+ "\n sexe : " + this.sexe;
     }
 
 }

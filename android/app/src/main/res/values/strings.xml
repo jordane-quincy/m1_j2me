@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BatailleCartes</string>
+    <string name="app_name">Informations du joueur</string>
 
     <!-- Strings related to login -->
     <string name="prompt_nom">Nom</string>
@@ -8,14 +8,7 @@
     <string name="prompt_sexe">Sexe</string>
     <string name="prompt_homme">Homme</string>
     <string name="prompt_femme">Femme</string>
-    <string name="action_save">Save</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
-    <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
-    <string name="title_activity_bataille">BatailleActivity</string>
+    <string name="action_save">Sauver</string>
+    <string name="error_field_required">Ce champ est obligatoire.</string>
+    <string name="title_activity_bataille">Bataille de cartes</string>
 </resources>
