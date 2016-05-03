@@ -33,8 +33,8 @@ public class PersonneDataSource {
         ContentValues values = new ContentValues();
         values.put(MySQLiteHelper.COLUMN_NOM, personne.getNom());
         values.put(MySQLiteHelper.COLUMN_PRENOM, personne.getPrenom());
-        long insertId = database.insert(MySQLiteHelper.TABLE_PERSONNE, null,
-                values);
+        long insertId = database.insertWithOnConflict(MySQLiteHelper.TABLE_PERSONNE, null,
+                values, SQLiteDatabase.CONFLICT_REPLACE);
         Cursor cursor = database.query(MySQLiteHelper.TABLE_PERSONNE,
                 allColumns, MySQLiteHelper.COLUMN_ID + " = " + insertId, null,
                 null, null, null);
@@ -43,14 +43,14 @@ public class PersonneDataSource {
         cursor.close();
         return newPersonne;
     }
-/*
-    public void deleteComment(Comment comment) {
-        long id = comment.getId();
-        System.out.println("Comment deleted with id: " + id);
-        database.delete(MySQLiteHelper.TABLE_COMMENTS, MySQLiteHelper.COLUMN_ID
+
+    public void deletePersonne(Personne personne) {
+        long id = personne.getId();
+        System.out.println("personne deleted with id: " + id);
+        database.delete(MySQLiteHelper.TABLE_PERSONNE, MySQLiteHelper.COLUMN_ID
                 + " = " + id, null);
     }
-*/
+
     private Personne cursorToPersonne(Cursor cursor) {
         Personne personne = new Personne();
         personne.setId(cursor.getInt(0));

@@ -60,6 +60,33 @@
 
             </android.support.design.widget.TextInputLayout>
 
+            <SeekBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/seekBar"
+                android:text="@string/prompt_age"
+                android:hint="@string/prompt_age"
+                android:layout_gravity="center_horizontal"/>
+
+            <RadioGroup
+                android:id="@+id/radioGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left">
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/prompt_homme"
+                    android:id="@+id/radioButton"/>
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/prompt_femme"
+                    android:id="@+id/radioButton2"/>
+            </RadioGroup>
+
             <Button
                 android:id="@+id/save_button"
                 style="?android:textAppearanceSmall"
